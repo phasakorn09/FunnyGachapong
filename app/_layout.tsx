@@ -25,6 +25,13 @@ export default function Layout() {
           tabBarIcon: ({ color }) => <Text style={{ color }}>📍</Text>,
         }}
       />
+      <Tabs.Screen
+        name="deck"
+        options={{
+          title: "Deck",
+          tabBarIcon: ({ color }) => <Text style={{ color }}>🗂️</Text>,
+        }}
+      />
     </Tabs>
   );
 }
