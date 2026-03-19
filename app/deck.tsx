@@ -24,8 +24,8 @@ import {
   deleteDeck,
   fetchDecks,
   loadProfileAvatarUrl,
-  pickAndUploadCover,
   updateDeckCards,
+  uploadCoverImage,
   uploadProfileImage,
 } from "../lib/deckService";
 
@@ -156,13 +156,23 @@ export default function DeckScreen() {
     }
   };
 
-  // FIX: pickAndUploadCover จัดการ picker เอง ดังนั้น handlePickCover แค่รับ URI มาแล้ว set loading
+  // FIX: เปิด picker ก่อน (ผ่าน ImagePicker โดยตรง) แล้วค่อย set loading หลัง picker ปิด
   const handlePickCover = async () => {
     if (uploadingCover) return;
-    // pickAndUploadCover เปิด picker ก่อน ถ้า cancel จะคืน null ทันที
+    // ขอ permission และเปิด picker ก่อน — ยังไม่ set loading
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images' as any,
+      quality: 0.7,
+      allowsEditing: true,
+      aspect: [16, 9],
+    });
+    if (result.canceled || !result.assets[0]) return;
+    // set loading หลังจาก picker ปิดเสร็จแล้ว
     setUploadingCover(true);
     try {
-      const url = await pickAndUploadCover();
+      const url = await uploadCoverImage(result.assets[0].uri);
       if (url) setCoverUrl(url);
     } catch (e: any) {
       Alert.alert("อัปโหลดรูปไม่สำเร็จ", e.message);
